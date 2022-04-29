@@ -46,3 +46,63 @@ group {1 | 2 | 5 | 14 | 15 | 16 | 19 | 20 | 24}
     **crypto map** map name
 
 ## Profiles
+
+## Example
+
+```
+R1
+crypto isakmp policy 10
+authentication pre-share
+hash sha256
+encryption aesgroup 14
+!
+crypto isakmp key CISCO123 address 100.64.2.2
+!
+crypto ipsec transform-set AES_SHA esp-aes esp-sha-hmac
+mode transport
+!
+ip access-list extended GRE_IPSEC_VPN
+permit gre host 100.64.1.1 host 100.64.2.2
+!
+crypto map VPN 10 ipsec-isakmp
+match address GRE_IPSEC_VPN
+set transform AES_SHA
+set peer 100.64.2.2
+!
+interface GigabitEthernet0/1
+ip address 100.64.1.1 255.255.255.252
+crypto map VPN
+!
+interface Tunnel100
+bandwidth 4000
+ip address 192.168.100.1 255.255.255.0
+ip mtu 1400
+tunnel source GigabitEthernet0/1
+tunnel destination 100.64.2.2
+router ospf 1
+router-id 1.1.1.1
+network 10.1.1.1 0.0.0.0 area 1
+network 192.168.100.1 0.0.0.0 area 0
+R2
+crypto isakmp policy 10
+authentication pre-share
+hash sha256encryption aes
+group 14
+crypto isakmp key CISCO123 address 100.64.1.1
+crypto ipsec transform-set AES_SHA esp-aes esp-sha-hmac
+mode transport
+crypto ipsec profile IPSEC_PROFILE
+set transform-set AES_SHA
+interface GigabitEthernet0/1
+ip address 100.64.2.2 255.255.255.252
+interface Tunnel100
+bandwidth 4000
+ip address 192.168.100.2 255.255.255.0
+ip mtu 1400
+tunnel source GigabitEthernet0/1
+tunnel destination 100.64.1.1
+tunnel protection ipsec profile IPSEC_PROFILE
+router ospf 1
+router-id 2.2.2.2
+network 10.2.2.0 0.0.0.255 area 2
+network 192.168.100.2 0.0.0.0 area 0
