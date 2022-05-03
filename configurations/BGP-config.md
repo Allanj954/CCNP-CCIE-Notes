@@ -26,3 +26,7 @@ router bgp 65200
     exit-address-family
 
 ```
+
+## Aggregate Address
+
+Dynamic route summarization is accomplished with command: **aggregate-address** network subnet-mask (summary-only)(as-set)
